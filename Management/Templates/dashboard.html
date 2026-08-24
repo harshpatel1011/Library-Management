@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div class="header-text">
+        <h1 style="font-size: 2rem; margin-bottom: 0;">Dashboard</h1>
+        <p style="margin-top: 0.5rem; margin-bottom: 0;">Quick overview of library activity</p>
+    </div>
+    <div class="header-actions">
+    </div>
+</div>
+
+<div class="dossier-section" style="background-color: var(--bg-card); padding: 2rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 class="form-section-title" style="margin-bottom: 0; border: none; padding: 0; font-size: 1.5rem;">Recent Transactions</h2>
+        <a href="{% url 'all_transactions' %}" class="btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">View All <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i></a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Customer Name</th>
+                    <!-- <th>Customer Email</th> -->
+                    <th>Mobile No.</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-main);">{{ transaction.book.title }}</td>
+                    <td>{{ transaction.customer_name }}</td>
+                    <!-- <td style="color: var(--text-muted);">{{ transaction.customer_email }}</td> -->
+                      <td style="color: var(--text-muted);">{{ transaction.customer_mobile|default:"-" }}</td>
+                    <td>
+                        {% if transaction.status == 'Issued' %}
+                            <span style="color: var(--warning); font-weight: 600; font-size: 0.85rem; text-transform: uppercase;"><i class="fa-solid fa-clock"></i> Issued<br><small style="font-weight: 400; color: var(--text-muted); text-transform: none;">{{ transaction.issue_date|date:"M d, Y" }}</small></span>
+                        {% else %}
+                            <span style="color: var(--success); font-weight: 600; font-size: 0.85rem; text-transform: uppercase;"><i class="fa-solid fa-check-double"></i> Returned<br><small style="font-weight: 400; color: var(--text-muted); text-transform: none;">{{ transaction.return_date|date:"M d, Y" }}</small></span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                          {% if transaction.status == 'Issued' %}
+                          <form method="POST" action="{% url 'return_book' transaction.id %}" style="display:inline-block; float: right; margin: 0;" onsubmit="return confirm('Confirm book return?');">
+                              {% csrf_token %}
+                              <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer;">
+                                  Mark Returned
+                              </button>
+                          </form>
+                          {% else %}
+                          <a href="{% url 'view_transaction' transaction.id %}" class="dossier-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                              <i class="fa-regular fa-eye"></i> View
+                          </a>
+                          {% endif %}
+                      </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">No transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Action Sections -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+    
+    <!-- Issue Book Section -->
+    <div class="dossier-section" style="background-color: var(--bg-card); padding: 2rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm);">
+        <h2 class="form-section-title" style="margin-bottom: 1.5rem; border: none; padding: 0; font-size: 1.25rem;">Quick Issue Book</h2>
+        <form method="POST" action="{% url 'issue_book' %}">
+            {% csrf_token %}
+            <div class="form-group" style="position: relative; margin-bottom: 1rem;">
+                <label class="form-label">Select Book</label>
+                <div class="searchable-select-container">
+                    <input type="text" id="quick-book-search" class="form-input" placeholder="Search available books..." autocomplete="off">
+                    <ul id="quick-book-list" class="searchable-list" style="display: none; position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 0; margin: 0; list-style: none; z-index: 10; box-shadow: var(--shadow-sm);">
+                        <li data-value="" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">-- Available Books --</li>
+                        {% for b in available_books %}
+                        <li data-value="{{ b.id }}" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-main);">
+                            {{ b.title }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <input type="hidden" name="book_id" id="quick-hidden-book" required>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label" for="customer_name">Customer Name</label>
+                <input class="form-input" type="text" name="customer_name" id="customer_name" placeholder="Harsh Patel" required>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 1rem;">
+                <label class="form-label" for="customer_mobile">Mobile Number</label>
+                <input class="form-input" type="text" name="customer_mobile" id="customer_mobile" placeholder="+91 945 945 3141" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="customer_email">Customer Email</label>
+                <input class="form-input" type="email" name="customer_email" id="customer_email" placeholder="cdmi@gmail.com" required>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem;"><i class="fa-solid fa-hand-holding-hand" style="margin-right: 8px;"></i> Issue Book</button>
+        </form>
+    </div>
+
+    <!-- Return Book Section -->
+    <div class="dossier-section" style="background-color: var(--bg-card); padding: 2rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm);">
+        <h2 class="form-section-title" style="margin-bottom: 1.5rem; border: none; padding: 0; font-size: 1.25rem;">Quick Return Book</h2>
+        <form method="POST" action="{% url 'return_book_post' %}" onsubmit="return confirm('Confirm book return?');">
+            {% csrf_token %}
+            <div class="form-group" style="position: relative; margin-bottom: 1.5rem;">
+                <label class="form-label">Select Issued Book</label>
+                <div class="searchable-select-container">
+                    <input type="text" id="quick-return-search" class="form-input" placeholder="Search issued books..." autocomplete="off">
+                    <ul id="quick-return-list" class="searchable-list" style="display: none; position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 0; margin: 0; list-style: none; z-index: 10; box-shadow: var(--shadow-sm);">
+                        <li data-value="" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">-- Issued Transactions --</li>
+                        {% for t in issued_transactions %}
+                        <li data-value="{{ t.id }}" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-main);">
+                            {{ t.book.title }} ({{ t.customer_name }})
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <input type="hidden" name="transaction_id" id="quick-hidden-return" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem; background-color: var(--success); border-color: var(--success);"><i class="fa-solid fa-rotate-left" style="margin-right: 8px;"></i> Mark Returned</button>
+        </form>
+    </div>
+    
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function setupSearchableDropdown(searchId, listId, hiddenId) {
+            const searchInput = document.getElementById(searchId);
+            const list = document.getElementById(listId);
+            const hiddenInput = document.getElementById(hiddenId);
+            if (!searchInput || !list || !hiddenInput) return;
+            
+            const listItems = list.querySelectorAll("li");
+
+            searchInput.addEventListener("focus", function() {
+                list.style.display = "block";
+            });
+
+            searchInput.addEventListener("input", function() {
+                const filter = searchInput.value.toLowerCase();
+                listItems.forEach(item => {
+                    if (item.getAttribute("data-value") === "") return;
+                    if (item.textContent.toLowerCase().includes(filter)) {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+                hiddenInput.value = "";
+            });
+
+            listItems.forEach(item => {
+                item.addEventListener("click", function() {
+                    if(item.getAttribute("data-value") !== "") {
+                        searchInput.value = item.textContent.trim();
+                        hiddenInput.value = item.getAttribute("data-value");
+                    } else {
+                        searchInput.value = "";
+                        hiddenInput.value = "";
+                    }
+                    list.style.display = "none";
+                });
+                
+                item.addEventListener("mouseover", function() {
+                    this.style.backgroundColor = "var(--bg-main)";
+                    this.style.color = "var(--primary)";
+                });
+                item.addEventListener("mouseout", function() {
+                    this.style.backgroundColor = "";
+                    this.style.color = "";
+                });
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target !== searchInput && e.target !== list) {
+                    list.style.display = "none";
+                }
+            });
+        }
+        
+        setupSearchableDropdown("quick-book-search", "quick-book-list", "quick-hidden-book");
+        setupSearchableDropdown("quick-return-search", "quick-return-list", "quick-hidden-return");
+    });
+</script>
+{% endblock %}
+

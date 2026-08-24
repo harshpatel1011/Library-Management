@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div class="header-text">
+        <h1 style="font-size: 2rem; margin-bottom: 0;">Issue Book</h1>
+        <p style="margin-top: 0.5rem;">Select an available book to issue</p>
+    </div>
+
+</div>
+
+<div style="width: 100%;">
+    <form method="POST" action="{% url 'issue_book' %}">
+        {% csrf_token %}
+        <div class="form-grid" style="display: grid; grid-template-columns: 1fr; max-width: 800px; gap: 2rem;">
+            
+            <div class="form-group" style="position: relative;">
+                <label class="form-label">Select Book</label>
+                
+                <!-- Custom Searchable Dropdown -->
+                <div class="searchable-select-container">
+                    <input type="text" id="book-search" class="form-input" placeholder="Search by book title or author..." autocomplete="off"
+                    {% for b in books %}
+                        {% if request.GET.book_id == b.id|stringformat:"s" %}value="{{ b.title }} (by {{ b.author }})"{% endif %}
+                    {% endfor %}
+                    >
+                    <ul id="book-list" class="searchable-list" style="display: none; position: absolute; width: 100%; max-height: 250px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 0; margin: 0; list-style: none; z-index: 10; box-shadow: var(--shadow-sm);">
+                        <li data-value="" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">-- Select a Book --</li>
+                        {% for b in books %}
+                        <li data-value="{{ b.id }}" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-main);">
+                            {{ b.title }} (by {{ b.author }})
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <input type="hidden" name="book_id" id="hidden-book" required value="{{ request.GET.book_id|default:'' }}">
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                <div class="form-group">
+                    <label class="form-label" for="customer_name">Customer Name</label>
+                    <input class="form-input" type="text" name="customer_name" id="customer_name" placeholder="Harsh Patel" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customer_mobile">Mobile Number</label>
+                    <input class="form-input" type="text" name="customer_mobile" id="customer_mobile" placeholder="+91 945 945 3141" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customer_email">Customer Email</label>
+                    <input class="form-input" type="email" name="customer_email" id="customer_email" placeholder="cdmi@gmail.com" required>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem; max-width: 800px; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-primary" style="height: 45px; padding: 0 2rem;"><i class="fa-solid fa-hand-holding-hand" style="margin-right: 8px;"></i> Issue Book</button>
+        </div>
+    </form>
+</div>
+
+
+<div style="margin-top: 4rem;">
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-main); margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Currently Issued Books</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        {% for transaction in issued_transactions %}
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem; color: var(--text-main);">{{ transaction.book.title }}</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">to {{ transaction.customer_name }}</p>
+                </div>
+                <div>
+                    <span style="background-color: rgba(234, 179, 8, 0.1); color: var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;"><i class="fa-solid fa-clock"></i> Issued</span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">Issue Date:</span>
+                    <span style="color: var(--text-main); font-weight: 500;">{{ transaction.issue_date|date:"M d, Y" }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">Customer Email:</span>
+                    <span style="color: var(--text-main); font-weight: 500; font-size: 0.85rem;">{{ transaction.customer_email }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Mobile No:</span>
+                    <span style="color: var(--text-main); font-weight: 500; font-size: 0.85rem;">{{ transaction.customer_mobile|default:"N/A" }}</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <a href="{% url 'view_book' transaction.book.id %}" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; text-decoration: none;">
+                    <i class="fa-solid fa-book"></i> View Book
+                </a>
+                <form method="POST" action="{% url 'return_book_post' %}" style="display: inline;" onsubmit="return confirm('Mark this book as returned?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
+                    <button type="submit" class="btn-primary" style="background-color: var(--success); border-color: var(--success); padding: 0.4rem 0.75rem; font-size: 0.8rem; height: auto;">
+                        <i class="fa-solid fa-undo"></i> Return
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; background-color: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md);">
+            <p style="color: var(--text-muted); margin: 0;">There are currently no issued books.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("book-search");
+        const bookList = document.getElementById("book-list");
+        const hiddenBook = document.getElementById("hidden-book");
+        const listItems = bookList.querySelectorAll("li");
+
+        // Show list on focus
+        searchInput.addEventListener("focus", function() {
+            bookList.style.display = "block";
+        });
+
+        // Filter on type
+        searchInput.addEventListener("input", function() {
+            const filter = searchInput.value.toLowerCase();
+            listItems.forEach(item => {
+                if (item.getAttribute("data-value") === "") return;
+                if (item.textContent.toLowerCase().includes(filter)) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+            hiddenBook.value = ""; // Reset hidden value while typing
+        });
+
+        // Select item
+        listItems.forEach(item => {
+            item.addEventListener("click", function() {
+                if(item.getAttribute("data-value") !== "") {
+                    searchInput.value = item.textContent.trim();
+                    hiddenBook.value = item.getAttribute("data-value");
+                } else {
+                    searchInput.value = "";
+                    hiddenBook.value = "";
+                }
+                bookList.style.display = "none";
+            });
+            
+            // Hover styling
+            item.addEventListener("mouseover", function() {
+                this.style.backgroundColor = "var(--bg-main)";
+                this.style.color = "var(--primary)";
+            });
+            item.addEventListener("mouseout", function() {
+                this.style.backgroundColor = "";
+                this.style.color = "";
+            });
+        });
+
+        // Hide list when clicking outside
+        document.addEventListener("click", function(e) {
+            if (e.target !== searchInput && e.target !== bookList) {
+                bookList.style.display = "none";
+            }
+        });
+    });
+</script>
+{% endblock %}

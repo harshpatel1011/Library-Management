@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div class="header-text">
+        <h1 style="font-size: 2rem; margin-bottom: 0;">Edit Book</h1>
+        <p style="margin-top: 0.5rem;">Update details for "{{ book.title }}".</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'dashboard' %}" class="btn-secondary" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+            <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div style="width: 100%;">
+    <form method="POST" action="{% url 'edit_book' book.id %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Book Title</label>
+                <input class="form-input" type="text" name="title" value="{{ book.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Author</label>
+                <input class="form-input" type="text" name="author" value="{{ book.author }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Read Price (Rs)</label>
+                <input class="form-input" type="number" step="0.01" name="read_price" value="{{ book.read_price }}" required>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" name="description" rows="5" required>{{ book.description }}</textarea>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Book Images</label>
+                
+                {% if book.images.all %}
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;" id="existing-images-container">
+                    {% for img in book.images.all %}
+                        <div style="position: relative; display: inline-block;" class="existing-image-wrapper">
+                            <img src="{{ img.image.url }}" alt="Gallery Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);">
+                            <button type="button" onclick="removeGalleryImage(this, {{ img.id }})" style="position: absolute; top: -8px; right: -8px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='none'"><i class="fa-solid fa-xmark" style="font-size: 12px;"></i></button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="delete-image-inputs"></div>
+                {% endif %}
+
+                <div class="file-upload-wrapper">
+                    <input type="file" class="form-input" name="images" id="product_image" multiple style="display: none;">
+                    <div class="file-upload-placeholder" id="file-name" style="border: 2px dashed var(--border-color); padding: 2rem; text-align: center; cursor: pointer; border-radius: var(--border-radius-sm);" onclick="document.getElementById('product_image').click();">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i>
+                        <div style="font-weight: 500;">Click to upload images</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">PNG, JPG up to 5MB</div>
+                    </div>
+                </div>
+            </div>
+            
+
+
+            <script>
+                function removeGalleryImage(btn, id) {
+                    btn.closest('.existing-image-wrapper').style.display = 'none';
+                    document.getElementById('delete-image-inputs').innerHTML += '<input type="hidden" name="delete_gallery_images" value="' + id + '">';
+                }
+                
+                function clearImageSelection(e) {
+                    e.stopPropagation();
+                    document.getElementById('product_image').value = '';
+                    document.getElementById('file-name').innerHTML = `
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i>
+                        <div style="font-weight: 500;">Click to upload images</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">PNG, JPG up to 5MB</div>
+                    `;
+                }
+
+                document.getElementById('product_image').addEventListener('change', function(e) {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        const text = files.length === 1 ? files[0].name : `${files.length} images selected`;
+                        document.getElementById('file-name').innerHTML = `
+                            <i class="fa-solid fa-images" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i>
+                            <div style="font-weight: 500; color: var(--text-main);">${text}</div>
+                            <button type="button" class="dossier-btn dossier-btn-dark danger" onclick="clearImageSelection(event)" style="margin-top: 15px; cursor: pointer; padding: 0.5rem 1rem; border: 1px solid var(--danger); background: transparent; color: var(--danger); border-radius: 4px;"><i class="fa-solid fa-xmark"></i> Clear Selection</button>
+                        `;
+                    }
+                });
+            </script>
+        </div>
+        
+        <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-primary" style="height: 45px; padding: 0 2rem;"><i class="fa-solid fa-save" style="margin-right: 8px;"></i> Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

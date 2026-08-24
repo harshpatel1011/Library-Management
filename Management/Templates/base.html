@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .message {
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius-sm);
+            color: white;
+            box-shadow: var(--shadow-md);
+            font-weight: 500;
+        }
+        .message.success { background-color: var(--success); }
+        .message.error { background-color: var(--danger); }
+        .message.warning { background-color: var(--warning); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        {% block sidebar %}
+        <!-- Admin Sidebar -->
+        <div class="dossier-sidebar">
+            <h2 class="dossier-name">Library</h2>
+            <div class="dossier-actions">
+                <!-- Library Category -->
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; padding-left: 1rem;">Library</div>
+                <a href="{% url 'transactions' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'transactions' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Dashboard</a>
+                <a href="{% url 'all_transactions' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'all_transactions' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Transactions</a>
+                <a href="{% url 'issue_book' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'issue_book' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Issue Book</a>
+                <a href="{% url 'return_book_page' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'return_book_page' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Return Book</a>
+                <a href="{% url 'customers' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'customers' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Customers</a>
+
+                <!-- Book Category -->
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-top: 1rem; margin-bottom: 0.5rem; padding-left: 1rem;">Book</div>
+                <a href="{% url 'dashboard' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'dashboard' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Manage Books</a>
+                <a href="{% url 'add_book' %}" class="dossier-btn" style="{% if request.resolver_match.url_name == 'add_book' %}background-color: var(--bg-main); color: var(--primary);{% endif %}">Add Book</a>
+                
+                <a href="{% url 'logout' %}" class="dossier-btn danger" style="margin-top: auto;">Logout</a>
+            </div>
+        </div>
+        {% endblock %}
+
+        <div class="main-content">
+            <div class="content-wrapper">
+
+                <div class="messages">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="message {{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

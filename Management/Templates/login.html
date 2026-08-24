@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<style>
+    /* Override base layout to allow auth-container to take full screen */
+    .app-container { display: block !important; min-height: 100vh !important; }
+    .main-content { margin-left: 0 !important; padding: 0 !important; max-width: none !important; min-height: 100vh !important; }
+    .content-wrapper { padding: 0 !important; max-width: none !important; display: contents; }
+    
+    /* Hide the global base.html messages since we display them inside the auth card */
+    .messages { display: none !important; }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="page-header">
+            <div class="header-text">
+                <h1>Library</h1>
+                <p>Management Portal</p>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                    <div style="padding: 0.75rem; border-radius: var(--border-radius-sm); margin-bottom: 0.5rem; 
+                        {% if message.tags == 'error' %}color: var(--danger); background: #fee2e2; border: 1px solid #fca5a5;
+                        {% else %}color: var(--success); background: #dcfce7; border: 1px solid #86efac;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input class="form-input" type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-input" type="password" id="password" name="password" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-primary">Log In</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+orm>
+        </div>
+    </div>
+</body>
+</html>

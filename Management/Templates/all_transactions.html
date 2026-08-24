@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div class="header-text">
+        {% if specific_customer_name %}
+            <h1 style="font-size: 2rem; margin-bottom: 0;">{{ specific_customer_name }}'s History</h1>
+            <p style="margin-top: 0.5rem; margin-bottom: 0;">Transaction history for {{ specific_customer_email }}</p>
+        {% else %}
+            <h1 style="font-size: 2rem; margin-bottom: 0;">Transactions</h1>
+            <p style="margin-top: 0.5rem; margin-bottom: 0;">Complete history of book loans and returns</p>
+        {% endif %}
+    </div>
+    <div class="header-actions">
+        {% if specific_customer_name %}
+            <a href="{% url 'customers' %}" class="btn-secondary" style="height: 42px; line-height: 42px; text-decoration: none; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); margin-right: 1rem;"><i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back to Customers</a>
+        {% endif %}
+        <form method="GET" action="{% url 'all_transactions' %}" style="display: flex; gap: 8px;">
+            <input type="text" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Search transactions..." class="form-input" style="margin-bottom: 0; min-width: 250px;">
+            <button type="submit" class="btn-primary" style="height: 42px;">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="dossier-section" style="background-color: var(--bg-card); padding: 2rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm);">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    {% if not specific_customer_name %}
+                    <th>Customer Name</th>
+                    <!-- <th>Customer Email</th> -->
+                    <th>Mobile No.</th>
+                    {% endif %}
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-main);">{{ transaction.book.title }}</td>
+                    {% if not specific_customer_name %}
+                    <td>{{ transaction.customer_name }}</td>
+                    <!-- <td style="color: var(--text-muted);">{{ transaction.customer_email }}</td> -->
+                      <td style="color: var(--text-muted);">{{ transaction.customer_mobile|default:"-" }}</td>
+                    {% endif %}
+                    <td>
+                        {% if transaction.status == 'Issued' %}
+                            <span style="color: var(--warning); font-weight: 600; font-size: 0.85rem; text-transform: uppercase;"><i class="fa-solid fa-clock"></i> Issued<br><small style="font-weight: 400; color: var(--text-muted); text-transform: none;">{{ transaction.issue_date|date:"M d, Y" }}</small></span>
+                        {% else %}
+                            <span style="color: var(--success); font-weight: 600; font-size: 0.85rem; text-transform: uppercase;"><i class="fa-solid fa-check-double"></i> Returned<br><small style="font-weight: 400; color: var(--text-muted); text-transform: none;">{{ transaction.return_date|date:"M d, Y" }}</small></span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                          {% if transaction.status == 'Issued' %}
+                          <form method="POST" action="{% url 'return_book' transaction.id %}" style="display:inline-block; float: right; margin: 0;" onsubmit="return confirm('Confirm book return?');">
+                              {% csrf_token %}
+                              <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer;">
+                                  Mark Returned
+                              </button>
+                          </form>
+                          {% else %}
+                          <a href="{% url 'view_transaction' transaction.id %}" class="dossier-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                              <i class="fa-regular fa-eye"></i> View
+                          </a>
+                          {% endif %}
+                      </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if specific_customer_name %}4{% else %}6{% endif %}" style="text-align: center; color: var(--text-muted); padding: 3rem;">No transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

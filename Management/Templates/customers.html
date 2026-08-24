@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div class="header-text">
+        <h1 style="font-size: 2rem; margin-bottom: 0;">Customers</h1>
+        <p style="margin-top: 0.5rem;">Manage library customers and their borrowing history</p>
+    </div>
+    
+    <div class="header-actions">
+        <form method="GET" action="{% url 'customers' %}" style="display: flex; gap: 0.5rem;">
+            <div style="position: relative;">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search customers..." class="form-input" style="padding-left: 2.5rem; width: 300px; height: 40px;">
+                <i class="fa-solid fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+            </div>
+            <button type="submit" class="btn-primary" style="height: 40px; padding: 0 1rem;">Search</button>
+
+        </form>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+    {% for customer in customers %}
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+        
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(var(--primary-rgb), 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem;">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.25rem; margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">{{ customer.customer_name }}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0 0 0;"><i class="fa-solid fa-envelope" style="margin-right: 4px;"></i> {{ customer.customer_email }}</p>
+                {% if customer.customer_mobile %}
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0 0 0;"><i class="fa-solid fa-phone" style="margin-right: 4px;"></i> {{ customer.customer_mobile }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background-color: var(--bg-main); padding: 1rem; border-radius: var(--border-radius-sm); text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning); line-height: 1;">{{ customer.currently_issued }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Currently Issued</div>
+            </div>
+            <div style="background-color: var(--bg-main); padding: 1rem; border-radius: var(--border-radius-sm); text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success); line-height: 1;">{{ customer.returned_books }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Returned</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">
+                <i class="fa-solid fa-book" style="margin-right: 4px;"></i> {{ customer.total_books }} Total Transactions
+            </span>
+            <a href="{% url 'all_transactions' %}?name={{ customer.customer_name|urlencode }}&email={{ customer.customer_email|urlencode }}&mobile={{ customer.customer_mobile|default_if_none:''|urlencode }}" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; text-decoration: none;">
+                View History <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+            </a>
+        </div>
+        
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; background-color: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--border-radius-lg);">
+        <div style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"><i class="fa-solid fa-users-slash"></i></div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; color: var(--text-main);">No Customers Found</h3>
+        <p style="color: var(--text-light); max-width: 400px; margin: 0 auto;">{% if request.GET.q %}We couldn't find any customers matching your search query.{% else %}There are no customers in the system yet. Customers will appear here automatically once books are issued to them.{% endif %}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
