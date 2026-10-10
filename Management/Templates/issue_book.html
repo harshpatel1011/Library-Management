@@ -3,20 +3,20 @@
 
 
 {% block content %}
-<div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+<div class="page-header custom-style-18">
     <div class="header-text">
-        <h1 style="font-size: 2rem; margin-bottom: 0;">Issue Book</h1>
-        <p style="margin-top: 0.5rem;">Select an available book to issue</p>
+        <h1 class="custom-style-2">Issue Book</h1>
+        <p class="custom-style-3">Select an available book to issue</p>
     </div>
 
 </div>
 
-<div style="width: 100%;">
+<div class="custom-style-6">
     <form method="POST" action="{% url 'issue_book' %}">
         {% csrf_token %}
-        <div class="form-grid" style="display: grid; grid-template-columns: 1fr; max-width: 800px; gap: 2rem;">
+        <div class="form-grid custom-style-83">
             
-            <div class="form-group" style="position: relative;">
+            <div class="form-group custom-style-39">
                 <label class="form-label">Select Book</label>
                 
                 <!-- Custom Searchable Dropdown -->
@@ -26,10 +26,10 @@
                         {% if request.GET.book_id == b.id|stringformat:"s" %}value="{{ b.title }} (by {{ b.author }})"{% endif %}
                     {% endfor %}
                     >
-                    <ul id="book-list" class="searchable-list" style="display: none; position: absolute; width: 100%; max-height: 250px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 0; margin: 0; list-style: none; z-index: 10; box-shadow: var(--shadow-sm);">
-                        <li data-value="" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">-- Select a Book --</li>
+                    <ul id="book-list" class="searchable-list custom-style-84">
+                        <li class="custom-style-70" data-value="">-- Select a Book --</li>
                         {% for b in books %}
-                        <li data-value="{{ b.id }}" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); color: var(--text-main);">
+                        <li class="custom-style-71" data-value="{{ b.id }}">
                             {{ b.title }} (by {{ b.author }})
                         </li>
                         {% endfor %}
@@ -38,7 +38,7 @@
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+            <div class="custom-style-85">
                 <div class="form-group">
                     <label class="form-label" for="customer_name">Customer Name</label>
                     <input class="form-input" type="text" name="customer_name" id="customer_name" placeholder="Harsh Patel" required>
@@ -56,53 +56,53 @@
             </div>
         </div>
         
-        <div style="margin-top: 2rem; max-width: 800px; display: flex; justify-content: flex-end;">
-            <button type="submit" class="btn-primary" style="height: 45px; padding: 0 2rem;"><i class="fa-solid fa-hand-holding-hand" style="margin-right: 8px;"></i> Issue Book</button>
+        <div class="custom-style-86">
+            <button type="submit" class="btn-primary custom-style-17"><i class="fa-solid fa-hand-holding-hand custom-style-5"></i> Issue Book</button>
         </div>
     </form>
 </div>
 
 
-<div style="margin-top: 4rem;">
-    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-main); margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Currently Issued Books</h2>
+<div class="custom-style-87">
+    <h2 class="custom-style-88">Currently Issued Books</h2>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div class="custom-style-89">
         {% for transaction in issued_transactions %}
-        <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+        <div class="custom-style-90">
             
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div class="custom-style-91">
                 <div>
-                    <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem; color: var(--text-main);">{{ transaction.book.title }}</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">to {{ transaction.customer_name }}</p>
+                    <h3 class="custom-style-92">{{ transaction.book.title }}</h3>
+                    <p class="custom-style-93">to {{ transaction.customer_name }}</p>
                 </div>
                 <div>
-                    <span style="background-color: rgba(234, 179, 8, 0.1); color: var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;"><i class="fa-solid fa-clock"></i> Issued</span>
+                    <span class="custom-style-94"><i class="fa-solid fa-clock"></i> Issued</span>
                 </div>
             </div>
             
-            <div style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: var(--text-muted);">Issue Date:</span>
-                    <span style="color: var(--text-main); font-weight: 500;">{{ transaction.issue_date|date:"M d, Y" }}</span>
+            <div class="custom-style-95">
+                <div class="custom-style-96">
+                    <span class="custom-style-27">Issue Date:</span>
+                    <span class="custom-style-97">{{ transaction.issue_date|date:"M d, Y" }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: var(--text-muted);">Customer Email:</span>
-                    <span style="color: var(--text-main); font-weight: 500; font-size: 0.85rem;">{{ transaction.customer_email }}</span>
+                <div class="custom-style-96">
+                    <span class="custom-style-27">Customer Email:</span>
+                    <span class="custom-style-98">{{ transaction.customer_email }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Mobile No:</span>
-                    <span style="color: var(--text-main); font-weight: 500; font-size: 0.85rem;">{{ transaction.customer_mobile|default:"N/A" }}</span>
+                <div class="custom-style-99">
+                    <span class="custom-style-27">Mobile No:</span>
+                    <span class="custom-style-98">{{ transaction.customer_mobile|default:"N/A" }}</span>
                 </div>
             </div>
             
-            <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                <a href="{% url 'view_book' transaction.book.id %}" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; text-decoration: none;">
+            <div class="custom-style-55">
+                <a href="{% url 'view_book' transaction.book.id %}" class="btn-secondary custom-style-57">
                     <i class="fa-solid fa-book"></i> View Book
                 </a>
-                <form method="POST" action="{% url 'return_book_post' %}" style="display: inline;" onsubmit="return confirm('Mark this book as returned?');">
+                <form class="custom-style-100" method="POST" action="{% url 'return_book_post' %}" onsubmit="return confirm('Mark this book as returned?');">
                     {% csrf_token %}
                     <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
-                    <button type="submit" class="btn-primary" style="background-color: var(--success); border-color: var(--success); padding: 0.4rem 0.75rem; font-size: 0.8rem; height: auto;">
+                    <button type="submit" class="btn-primary custom-style-101">
                         <i class="fa-solid fa-undo"></i> Return
                     </button>
                 </form>
@@ -110,8 +110,8 @@
             
         </div>
         {% empty %}
-        <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; background-color: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md);">
-            <p style="color: var(--text-muted); margin: 0;">There are currently no issued books.</p>
+        <div class="custom-style-102">
+            <p class="custom-style-103">There are currently no issued books.</p>
         </div>
         {% endfor %}
     </div>
